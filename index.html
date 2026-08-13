@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Customer Prediction Portal</title>
+  <style>
+    :root {
+      --primary: #4f46e5;
+      --primary-hover: #4338ca;
+      --bg: #f8fafc;
+      --card-bg: #ffffff;
+      --text: #0f172a;
+      --text-muted: #64748b;
+      --border: #e2e8f0;
+      --accent-green: #10b981;
+      --accent-red: #ef4444;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 950px;
+      margin: 0 auto;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+
+    header h1 {
+      font-size: 2.2rem;
+      color: var(--text);
+      font-weight: 700;
+    }
+
+    header p {
+      color: var(--text-muted);
+      margin-top: 0.5rem;
+    }
+
+    form {
+      background: var(--card-bg);
+      padding: 28px;
+      border-radius: 16px;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.01);
+      border: 1px solid var(--border);
+    }
+
+    .section-title {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--primary);
+      margin-bottom: 1rem;
+      border-bottom: 2px solid #e0e7ff;
+      padding-bottom: 6px;
+      grid-column: 1 / -1;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 16px 20px;
+      margin-bottom: 24px;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+    }
+
+    label {
+      font-size: 0.875rem;
+      font-weight: 600;
+      margin-bottom: 6px;
+      color: #334155;
+    }
+
+    input, select {
+      padding: 10px 14px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: 0.95rem;
+      background-color: #fff;
+      transition: all 0.2s ease;
+      outline: none;
+    }
+
+    input:focus, select:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15);
+    }
+
+    .btn-submit {
+      width: 100%;
+      background-color: var(--primary);
+      color: white;
+      padding: 14px;
+      border: none;
+      border-radius: 10px;
+      font-size: 1.05rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background-color 0.2s ease, transform 0.1s ease;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .btn-submit:hover {
+      background-color: var(--primary-hover);
+    }
+
+    .btn-submit:active {
+      transform: scale(0.99);
+    }
+
+    .result-card {
+      margin-top: 24px;
+      padding: 20px;
+      border-radius: 12px;
+      text-align: center;
+      display: none;
+      animation: fadeIn 0.3s ease-in-out;
+    }
+
+    .result-card.success {
+      background-color: #ecfdf5;
+      border: 1px solid #a7f3d0;
+      color: #065f46;
+    }
+
+    .result-card.warning {
+      background-color: #fef2f2;
+      border: 1px solid #fecaca;
+      color: #991b1b;
+    }
+
+    .result-card h3 {
+      font-size: 1.4rem;
+      margin-bottom: 8px;
+    }
+
+    .spinner {
+      border: 3px solid rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      border-top: 3px solid #ffffff;
+      width: 20px;
+      height: 20px;
+      animation: spin 0.8s linear infinite;
+      display: none;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <header>
+      <h1>Machine Learning Prediction Portal</h1>
+      <p>Enter customer demographics and service metrics to perform real-time model inference.</p>
+    </header>
+
+    <form id="predictionForm">
+
+      <!-- Demographics -->
+      <div class="grid">
+        <h2 class="section-title">Demographics & Personal Details</h2>
+
+        <div class="form-group">
+          <label for="Gender">Gender</label>
+          <select id="Gender" name="Gender" required>
+            <option value="Male">Male</option>
+            <option value="Female">Female</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="Age">Age (18 - 100)</label>
+          <input type="number" id="Age" name="Age" min="18" max="100" value="35" required>
+        </div>
+
+        <div class="form-group">
+          <label for="Senior_Citizen">Senior Citizen</label>
+          <select id="Senior_Citizen" name="Senior_Citizen" required>
+            <option value="0">No (0)</option>
+            <option value="1">Yes (1)</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="Marital_Status">Marital Status</label>
+          <select id="Marital_Status" name="Marital_Status" required>
+            <option value="Single">Single</option>
+            <option value="Married">Married</option>
+            <option value="Divorced">Divorced</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="Region">Region</label>
+          <select id="Region" name="Region" required>
+            <option value="Central">Central</option>
+            <option value="East">East</option>
+            <option value="North">North</option>
+            <option value="South">South</option>
+            <option value="West">West</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Subscription & Payment Details -->
+      <div class="grid">
+        <h2 class="section-title">Account & Services</h2>
+
+        <div class="form-group">
+          <label for="Tenure">Tenure (Months)</label>
+          <input type="number" id="Tenure" name="Tenure" min="0" value="12" required>
+        </div>
+
+        <div class="form-group">
+          <label for="Contract_Type">Contract Type</label>
+          <select id="Contract_Type" name="Contract_Type" required>
+            <option value="Month-to-Month">Month-to-Month</option>
+            <option value="One Year">One Year</option>
+            <option value="Two Year">Two Year</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="Internet_Service">Internet Service</label>
+          <select id="Internet_Service" name="Internet_Service" required>
+            <option value="Fiber">Fiber</option>
+            <option value="5G">5G</option>
+            <option value="DSL">DSL</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="Phone_Service">Phone Service</label>
+          <select id="Phone_Service" name="Phone_Service" required>
+            <option value="Yes">Yes</option>
+            <option value="No">No</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="Multiple_Lines">Multiple Lines</label>
+          <select id="Multiple_Lines" name="Multiple_Lines" required>
+            <option value="No">No</option>
+            <option value="Yes">Yes</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="Tech_Support">Tech Support</label>
+          <select id="Tech_Support" name="Tech_Support" required>
+            <option value="Yes">Yes</option>
+            <option value="No">No</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="Streaming_Service">Streaming Service</label>
+          <select id="Streaming_Service" name="Streaming_Service" required>
+            <option value="No">No</option>
+            <option value="Yes">Yes</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="Payment_Method">Payment Method</label>
+          <select id="Payment_Method" name="Payment_Method" required>
+            <option value="Credit Card">Credit Card</option>
+            <option value="Debit Card">Debit Card</option>
+            <option value="Bank Transfer">Bank Transfer</option>
+            <option value="UPI">UPI</option>
+            <option value="Cash">Cash</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="Auto_Pay">Auto Pay Enabled</label>
+          <select id="Auto_Pay" name="Auto_Pay" required>
+            <option value="1">Yes (1)</option>
+            <option value="0">No (0)</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Financials & Usage -->
+      <div class="grid">
+        <h2 class="section-title">Billing & Usage Statistics</h2>
+
+        <div class="form-group">
+          <label for="Monthly_Charges">Monthly Charges ($)</label>
+          <input type="number" step="0.01" id="Monthly_Charges" name="Monthly_Charges" min="0.01" value="65.50" required>
+        </div>
+
+        <div class="form-group">
+          <label for="Total_Charges">Total Charges ($)</label>
+          <input type="number" step="0.01" id="Total_Charges" name="Total_Charges" min="0" value="786.00" required>
+        </div>
+
+        <div class="form-group">
+          <label for="Data_Usage_GB">Data Usage (GB)</label>
+          <input type="number" step="0.1" id="Data_Usage_GB" name="Data_Usage_GB" min="0" value="120.5" required>
+        </div>
+
+        <div class="form-group">
+          <label for="Call_Minutes">Call Minutes</label>
+          <input type="number" id="Call_Minutes" name="Call_Minutes" min="0" value="450" required>
+        </div>
+
+        <div class="form-group">
+          <label for="Support_Tickets">Support Tickets</label>
+          <input type="number" id="Support_Tickets" name="Support_Tickets" min="0" value="1" required>
+        </div>
+
+        <div class="form-group">
+          <label for="Satisfaction_Score">Satisfaction Score (1-10)</label>
+          <input type="number" id="Satisfaction_Score" name="Satisfaction_Score" min="1" max="10" value="8" required>
+        </div>
+
+        <div class="form-group">
+          <label for="Last_Login_Days">Last Login (Days Ago)</label>
+          <input type="number" id="Last_Login_Days" name="Last_Login_Days" min="0" value="3" required>
+        </div>
+
+        <div class="form-group">
+          <label for="Late_Payments">Late Payments</label>
+          <input type="number" id="Late_Payments" name="Late_Payments" min="0" value="0" required>
+        </div>
+      </div>
+
+      <button type="submit" class="btn-submit" id="submitBtn">
+        <span class="spinner" id="spinner"></span>
+        <span id="btnText">Predict Output</span>
+      </button>
+
+    </form>
+
+    <div class="result-card" id="resultCard">
+      <h3 id="resultTitle">Prediction Result</h3>
+      <p id="resultBody"></p>
+    </div>
+
+  </div>
+
+  <script>
+    const form = document.getElementById('predictionForm');
+    const resultCard = document.getElementById('resultCard');
+    const resultTitle = document.getElementById('resultTitle');
+    const resultBody = document.getElementById('resultBody');
+    const spinner = document.getElementById('spinner');
+    const btnText = document.getElementById('btnText');
+    const submitBtn = document.getElementById('submitBtn');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      // Set UI loading state
+      spinner.style.display = 'inline-block';
+      btnText.textContent = 'Processing...';
+      submitBtn.disabled = true;
+      resultCard.style.display = 'none';
+
+      // Prepare payload matching FastAPI input schema
+      const payload = {
+        Gender: document.getElementById('Gender').value,
+        Age: parseInt(document.getElementById('Age').value),
+        Senior_Citizen: parseInt(document.getElementById('Senior_Citizen').value),
+        Marital_Status: document.getElementById('Marital_Status').value,
+        Region: document.getElementById('Region').value,
+        Tenure: parseInt(document.getElementById('Tenure').value),
+        Contract_Type: document.getElementById('Contract_Type').value,
+        Internet_Service: document.getElementById('Internet_Service').value,
+        Phone_Service: document.getElementById('Phone_Service').value,
+        Multiple_Lines: document.getElementById('Multiple_Lines').value,
+        Tech_Support: document.getElementById('Tech_Support').value,
+        Streaming_Service: document.getElementById('Streaming_Service').value,
+        Payment_Method: document.getElementById('Payment_Method').value,
+        Monthly_Charges: parseFloat(document.getElementById('Monthly_Charges').value),
+        Total_Charges: parseFloat(document.getElementById('Total_Charges').value),
+        Data_Usage_GB: parseFloat(document.getElementById('Data_Usage_GB').value),
+        Call_Minutes: parseFloat(document.getElementById('Call_Minutes').value),
+        Support_Tickets: parseInt(document.getElementById('Support_Tickets').value),
+        Satisfaction_Score: parseInt(document.getElementById('Satisfaction_Score').value),
+        Last_Login_Days: parseInt(document.getElementById('Last_Login_Days').value),
+        Late_Payments: parseInt(document.getElementById('Late_Payments').value),
+        Auto_Pay: parseInt(document.getElementById('Auto_Pay').value)
+      };
+
+      try {
+        const response = await fetch('http://127.0.0.1:8000/predict', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(payload)
+        });
+
+        if (!response.ok) {
+          throw new Error(`Server returned HTTP status ${response.status}`);
+        }
+
+        const data = await response.json();
+
+        resultCard.style.display = 'block';
+        if (data.prediction === 1) {
+          resultCard.className = 'result-card success';
+          resultTitle.textContent = 'Result Class: 1';
+          resultBody.textContent = 'The model predicted positive output (1).';
+        } else {
+          resultCard.className = 'result-card warning';
+          resultTitle.textContent = 'Result Class: 0';
+          resultBody.textContent = 'The model predicted negative output (0).';
+        }
+
+      } catch (err) {
+        resultCard.style.display = 'block';
+        resultCard.className = 'result-card warning';
+        resultTitle.textContent = 'Error Occurred';
+        resultBody.textContent = 'Could not connect to FastAPI server. Please verify backend is running on http://127.0.0.1:8000.';
+        console.error('Fetch error:', err);
+      } finally {
+        spinner.style.display = 'none';
+        btnText.textContent = 'Predict Output';
+        submitBtn.disabled = false;
+      }
+    });
+  </script>
+</body>
+</html>
